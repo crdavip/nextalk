@@ -2,7 +2,8 @@
 
 import { useConversations } from "@/lib/conversations-context"
 import { Button } from "@/components/ui/button"
-import { Menu, Plus } from "lucide-react"
+import { Menu, MessageSquarePlus } from "lucide-react"
+import { Isotipo } from "./isotipo"
 
 interface WelcomeScreenProps {
   onMenuClick: () => void
@@ -25,31 +26,29 @@ export function WelcomeScreen({ onMenuClick }: WelcomeScreenProps) {
           <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary/10 flex items-center justify-center">
             <span className="text-xs md:text-sm font-semibold text-primary">AI</span>
           </div>
-          <span className="text-xs md:text-sm font-medium">NexTalk AI</span>
+          <span className="text-xs md:text-sm font-medium">4o-mini</span>
         </div>
 
         <button
           onClick={createConversation}
           className="flex px-3 md:px-2 py-1.5 md:py-2 bg-foreground text-background rounded-lg text-xs md:text-sm font-medium hover:bg-foreground/90 transition-colors cursor-pointer"
         >
-          <span className="hidden sm:flex sm:items-center sm:gap-1"><Plus /> Nuevo Chat</span>
-          <span className="flex items-center gap-1 sm:hidden"><Plus /> Chat</span>
+          <span className="hidden sm:flex sm:items-center sm:gap-1"><MessageSquarePlus /> Nuevo Chat</span>
+          <span className="flex items-center gap-1 sm:hidden"><MessageSquarePlus /> Chat</span>
         </button>
       </div>
 
       <div className="flex-1 flex items-center justify-center px-4 md:px-8 py-8">
         <div className="max-w-2xl w-full text-center">
-          <div className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-6 md:mb-8 rounded-full bg-linear-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
-            <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-linear-to-br from-blue-500/30 to-purple-500/30 flex items-center justify-center">
-              <div className="w-9 h-9 md:w-12 md:h-12 rounded-full bg-linear-to-br from-blue-500/40 to-purple-500/40" />
-            </div>
+          <div className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-6 md:mb-8 flex items-center justify-center">
+            <Isotipo animation={true} />
           </div>
 
-          <h1 className="text-2xl md:text-4xl font-bold mb-2 text-balance">{greeting}, Alejandro</h1>
+          <h1 className="text-2xl md:text-4xl mb-2 text-balance">{greeting}, Alejandro</h1>
           <p className="text-2xl md:text-4xl font-bold text-balance">
-            ¿Cómo Puedo{" "}
+            ¿Cómo puedo{" "}
             <span className="bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Asistirte Hoy?
+              asistirte hoy?
             </span>
           </p>
 

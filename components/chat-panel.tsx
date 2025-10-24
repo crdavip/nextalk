@@ -1,10 +1,11 @@
 "use client"
 
+import { useState } from "react"
 import { useConversations } from "@/lib/conversations-context"
 import { MessagesList } from "./messages-list"
 import { MessageInput } from "./message-input"
 import type { Message } from "@/lib/types"
-import { useState } from "react"
+import { generateId } from "@/helpers/generate-id"
 
 export function ChatPanel() {
   const { activeConversation, addMessage, updateConversationTitle } = useConversations()
@@ -16,7 +17,7 @@ export function ChatPanel() {
 
   const handleSendMessage = async (content: string) => {
     const userMessage: Message = {
-      id: crypto.randomUUID(),
+      id: generateId(),
       role: "user",
       content,
       timestamp: new Date(),
@@ -62,7 +63,7 @@ export function ChatPanel() {
       const decoder = new TextDecoder()
       let aiMessageContent = ""
 
-      const aiMessageId = crypto.randomUUID()
+      const aiMessageId = generateId()
 
       if (reader) {
         while (true) {
@@ -109,7 +110,7 @@ export function ChatPanel() {
       const errMsg = error instanceof Error ? error.message : String(error)
       // Mostrar el mensaje de error real devuelto por el servidor para depuración/UX
       addMessage(activeConversation.id, {
-        id: crypto.randomUUID(),
+        id: generateId(),
         role: "assistant",
         content: `Lo siento, hubo un error al procesar tu mensaje: ${errMsg}`,
         timestamp: new Date(),

@@ -42,7 +42,7 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Inicia una consulta..."
-              className="flex-1 bg-transparent border-0 outline-none resize-none min-h-[24px] max-h-[120px] text-sm"
+              className="flex-1 bg-transparent border-0 outline-none resize-none min-h-6 max-h-[120px] text-sm"
               disabled={disabled}
               rows={1}
             />

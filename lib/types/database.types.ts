@@ -6,161 +6,208 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type MessageRole = 'user' | 'assistant' | 'system'
-
-export interface Database {
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
+  }
   public: {
     Tables: {
-      users: {
+      api_keys: {
         Row: {
-          id: string
-          username: string | null
-          email: string | null
-          hashed_password: string | null
-          metadata: Json | null
           created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          username?: string | null
-          email?: string | null
-          hashed_password?: string | null
-          metadata?: Json | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          username?: string | null
-          email?: string | null
-          hashed_password?: string | null
-          metadata?: Json | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      conversations: {
-        Row: {
           id: string
-          owner_id: string | null
-          name: string
-          metadata: Json | null
           is_active: boolean
-          created_at: string
+          key_encrypted: string
+          service: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
-          id?: string
-          owner_id?: string | null
-          name?: string
-          metadata?: Json | null
-          is_active?: boolean
           created_at?: string
+          id?: string
+          is_active?: boolean
+          key_encrypted: string
+          service: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
+          created_at?: string
           id?: string
-          owner_id?: string | null
-          name?: string
-          metadata?: Json | null
           is_active?: boolean
-          created_at?: string
+          key_encrypted?: string
+          service?: string
           updated_at?: string
+          user_id?: string | null
         }
-      }
-      messages: {
-        Row: {
-          id: string
-          conversation_id: string
-          sender_id: string | null
-          role: MessageRole
-          content: string
-          content_meta: Json | null
-          is_streaming: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          conversation_id: string
-          sender_id?: string | null
-          role: MessageRole
-          content: string
-          content_meta?: Json | null
-          is_streaming?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          conversation_id?: string
-          sender_id?: string | null
-          role?: MessageRole
-          content?: string
-          content_meta?: Json | null
-          is_streaming?: boolean
-          created_at?: string
-          updated_at?: string
-        }
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       attachments: {
         Row: {
+          created_at: string
+          file_url: string
           id: string
           message_id: string
-          file_url: string
+          metadata: Json | null
           mime_type: string | null
           size_bytes: number | null
-          metadata: Json | null
-          created_at: string
         }
         Insert: {
+          created_at?: string
+          file_url: string
           id?: string
           message_id: string
-          file_url: string
+          metadata?: Json | null
           mime_type?: string | null
           size_bytes?: number | null
-          metadata?: Json | null
-          created_at?: string
         }
         Update: {
+          created_at?: string
+          file_url?: string
           id?: string
           message_id?: string
-          file_url?: string
+          metadata?: Json | null
           mime_type?: string | null
           size_bytes?: number | null
-          metadata?: Json | null
-          created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "attachments_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
-      api_keys: {
+      conversations: {
         Row: {
-          id: string
-          user_id: string | null
-          service: string
-          key_encrypted: string
-          is_active: boolean
           created_at: string
+          id: string
+          is_active: boolean
+          metadata: Json | null
+          name: string
+          owner_id: string | null
           updated_at: string
         }
         Insert: {
-          id?: string
-          user_id?: string | null
-          service: string
-          key_encrypted: string
-          is_active?: boolean
           created_at?: string
+          id?: string
+          is_active?: boolean
+          metadata?: Json | null
+          name?: string
+          owner_id?: string | null
           updated_at?: string
         }
         Update: {
-          id?: string
-          user_id?: string | null
-          service?: string
-          key_encrypted?: string
-          is_active?: boolean
           created_at?: string
+          id?: string
+          is_active?: boolean
+          metadata?: Json | null
+          name?: string
+          owner_id?: string | null
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          content_meta: Json | null
+          conversation_id: string
+          created_at: string
+          id: string
+          is_streaming: boolean
+          role: Database["public"]["Enums"]["message_role"]
+          sender_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          content_meta?: Json | null
+          conversation_id: string
+          created_at?: string
+          id?: string
+          is_streaming?: boolean
+          role: Database["public"]["Enums"]["message_role"]
+          sender_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          content_meta?: Json | null
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          is_streaming?: boolean
+          role?: Database["public"]["Enums"]["message_role"]
+          sender_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          created_at: string
+          email: string | null
+          hashed_password: string | null
+          id: string
+          metadata: Json | null
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          hashed_password?: string | null
+          id?: string
+          metadata?: Json | null
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          hashed_password?: string | null
+          id?: string
+          metadata?: Json | null
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
@@ -170,32 +217,135 @@ export interface Database {
       [_ in never]: never
     }
     Enums: {
-      message_role: MessageRole
+      message_role: "user" | "assistant" | "system"
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }
 
-// Tipos de ayuda para acceder a las tablas
-export type Tables = Database['public']['Tables']
-export type TableName = keyof Tables
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-// Tipos para cada tabla
-export type User = Tables['users']['Row']
-export type NewUser = Tables['users']['Insert']
-export type UserUpdate = Tables['users']['Update']
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
-export type Conversation = Tables['conversations']['Row']
-export type NewConversation = Tables['conversations']['Insert']
-export type ConversationUpdate = Tables['conversations']['Update']
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
 
-export type Message = Tables['messages']['Row']
-export type NewMessage = Tables['messages']['Insert']
-export type MessageUpdate = Tables['messages']['Update']
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
 
-export type Attachment = Tables['attachments']['Row']
-export type NewAttachment = Tables['attachments']['Insert']
-export type AttachmentUpdate = Tables['attachments']['Update']
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
 
-export type ApiKey = Tables['api_keys']['Row']
-export type NewApiKey = Tables['api_keys']['Insert']
-export type ApiKeyUpdate = Tables['api_keys']['Update']
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      message_role: ["user", "assistant", "system"],
+    },
+  },
+} as const

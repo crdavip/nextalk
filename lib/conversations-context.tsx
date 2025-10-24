@@ -61,9 +61,6 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       } else if (data) {
         const uiConversations = data.map(c => mapDbConversationToUi(c));
         setConversations(uiConversations)
-        if (uiConversations.length > 0) {
-            setActiveConversationId(uiConversations[0].id)
-        }
       }
       setIsLoading(false)
     }
@@ -105,7 +102,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     setConversations((prev) => prev.filter((c) => c.id !== id))
     if (activeConversationId === id) {
       const remainingConversations = conversations.filter(c => c.id !== id);
-      setActiveConversationId(remainingConversations.length > 0 ? remainingConversations[0].id : null)
+      setActiveConversationId(null)
     }
 
     const { error } = await supabase.from('conversations').delete().match({ id })

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useTheme } from "next-themes"
 import { useConversations } from "@/lib/conversations-context"
+import Image from "next/image"
 
 export function SidebarFooter() {
   const { theme, setTheme } = useTheme()
@@ -29,11 +30,11 @@ export function SidebarFooter() {
   return (
     <div className="p-3 border-t border-border flex items-center gap-3">
       <Avatar className="w-9 h-9">
-        <AvatarFallback className="bg-primary text-primary-foreground text-sm">JD</AvatarFallback>
+        <Image src={"/avatar.png"} alt="Avatar" width={100} height={100} priority={false} />
       </Avatar>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">Judha Maygustya</p>
-        <p className="text-xs text-muted-foreground truncate">judha.design@gmail.com</p>
+        <p className="text-sm font-medium truncate">Alejandro Rojas</p>
+        <p className="text-xs text-muted-foreground truncate">alejandro@ezcala.ai</p>
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

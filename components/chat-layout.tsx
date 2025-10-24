@@ -18,7 +18,7 @@ export function ChatLayout() {
   return (
     <div className="flex h-screen bg-background">
       {isSidebarOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setIsSidebarOpen(false)} />
+        <div className="fixed inset-0 bg-background/80 z-40 lg:hidden" onClick={() => setIsSidebarOpen(false)} />
       )}
 
       <div
