@@ -46,7 +46,16 @@ export function ChatPanel() {
       })
 
       if (!response.ok) {
-        throw new Error("Error al obtener respuesta de IA")
+        // Try to read error body for more details
+        let errText = ""
+        try {
+          errText = await response.text()
+        } catch (e) {
+          // ignore
+        }
+        console.error("/api/chat error", response.status, errText)
+        const message = errText || `Error al obtener respuesta de IA (status ${response.status})`
+        throw new Error(message)
       }
 
       const reader = response.body?.getReader()
@@ -97,10 +106,12 @@ export function ChatPanel() {
       }
     } catch (error) {
       console.error("[v0] Error al enviar mensaje:", error)
+      const errMsg = error instanceof Error ? error.message : String(error)
+      // Mostrar el mensaje de error real devuelto por el servidor para depuración/UX
       addMessage(activeConversation.id, {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: "Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo.",
+        content: `Lo siento, hubo un error al procesar tu mensaje: ${errMsg}`,
         timestamp: new Date(),
       })
     } finally {
