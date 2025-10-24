@@ -2,7 +2,7 @@
 
 import { useConversations } from "@/lib/conversations-context"
 import { Button } from "@/components/ui/button"
-import { Menu } from "lucide-react"
+import { Menu, Plus } from "lucide-react"
 
 interface WelcomeScreenProps {
   onMenuClick: () => void
@@ -30,10 +30,10 @@ export function WelcomeScreen({ onMenuClick }: WelcomeScreenProps) {
 
         <button
           onClick={createConversation}
-          className="px-3 md:px-4 py-1.5 md:py-2 bg-foreground text-background rounded-lg text-xs md:text-sm font-medium hover:bg-foreground/90 transition-colors"
+          className="flex px-3 md:px-2 py-1.5 md:py-2 bg-foreground text-background rounded-lg text-xs md:text-sm font-medium hover:bg-foreground/90 transition-colors cursor-pointer"
         >
-          <span className="hidden sm:inline">+ Nuevo Chat</span>
-          <span className="sm:hidden">+ Chat</span>
+          <span className="hidden sm:flex sm:items-center sm:gap-1"><Plus /> Nuevo Chat</span>
+          <span className="flex items-center gap-1 sm:hidden"><Plus /> Chat</span>
         </button>
       </div>
 
@@ -45,7 +45,7 @@ export function WelcomeScreen({ onMenuClick }: WelcomeScreenProps) {
             </div>
           </div>
 
-          <h1 className="text-2xl md:text-4xl font-bold mb-2 text-balance">{greeting}, Usuario</h1>
+          <h1 className="text-2xl md:text-4xl font-bold mb-2 text-balance">{greeting}, Alejandro</h1>
           <p className="text-2xl md:text-4xl font-bold text-balance">
             ¿Cómo Puedo{" "}
             <span className="bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">

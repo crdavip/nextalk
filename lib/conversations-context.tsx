@@ -1,162 +1,185 @@
 "use client"
-
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react"
-import type { Conversation, Message } from "./types"
+import { type Conversation, type Message } from "@/lib/types"
+import { type Database } from "@/lib/types/database.types"
+import { createClient } from "@/lib/supabase/client"
+
+type DbConversation = Database['public']['Tables']['conversations']['Row']
+type DbMessage = Database['public']['Tables']['messages']['Row']
+type NewConversation = Database['public']['Tables']['conversations']['Insert']
+type NewMessage = Database['public']['Tables']['messages']['Insert']
+
+const mapDbConversationToUi = (dbConvo: Partial<DbConversation> & { messages?: Partial<DbMessage>[] }): Conversation => ({
+  id: dbConvo.id!,
+  title: dbConvo.name!,
+  createdAt: new Date(dbConvo.created_at!),
+  updatedAt: new Date(dbConvo.updated_at!),
+  messages: (dbConvo.messages || []).map(mapDbMessageToUi),
+});
+
+const mapDbMessageToUi = (dbMsg: Partial<DbMessage>): Message => ({
+  id: dbMsg.id!,
+  role: dbMsg.role === 'user' ? 'user' : 'assistant',
+  content: dbMsg.content!,
+  timestamp: new Date(dbMsg.created_at!),
+});
 
 interface ConversationsContextType {
   conversations: Conversation[]
   activeConversationId: string | null
   activeConversation: Conversation | null
-  createConversation: () => void
+  createConversation: () => Promise<string | undefined>
   selectConversation: (id: string) => void
-  deleteConversation: (id: string) => void
-  addMessage: (conversationId: string, message: Message) => void
-  updateConversationTitle: (id: string, title: string) => void
-  clearAllConversations: () => void
+  deleteConversation: (id: string) => Promise<void>
+  addMessage: (conversationId: string, message: Message) => Promise<void>
+  updateConversationTitle: (id: string, title: string) => Promise<void>
+  clearAllConversations: () => Promise<void>
+  isLoading: boolean
 }
 
 const ConversationsContext = createContext<ConversationsContextType | undefined>(undefined)
 
-const STORAGE_KEY = "nextalk_conversations"
-const ACTIVE_CONVERSATION_KEY = "nextalk_active_conversation"
-
-function saveToLocalStorage(key: string, data: unknown) {
-  try {
-    localStorage.setItem(key, JSON.stringify(data))
-  } catch (error) {
-    console.error("[v0] Error al guardar en localStorage:", error)
-  }
-}
-
-function loadFromLocalStorage<T>(key: string, defaultValue: T): T {
-  try {
-    const item = localStorage.getItem(key)
-    if (!item) return defaultValue
-
-    const parsed = JSON.parse(item)
-
-    // Convertir strings de fecha a objetos Date
-    if (Array.isArray(parsed)) {
-      return parsed.map((conv) => ({
-        ...conv,
-        createdAt: new Date(conv.createdAt),
-        updatedAt: new Date(conv.updatedAt),
-        messages: conv.messages.map((msg: Message) => ({
-          ...msg,
-          timestamp: new Date(msg.timestamp),
-        })),
-      })) as T
-    }
-
-    return parsed
-  } catch (error) {
-    console.error("[v0] Error al cargar desde localStorage:", error)
-    return defaultValue
-  }
-}
-
 export function ConversationsProvider({ children }: { children: ReactNode }) {
+  const supabase = createClient()
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
-  const [isInitialized, setIsInitialized] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const savedConversations = loadFromLocalStorage<Conversation[]>(STORAGE_KEY, [])
-    const savedActiveId = loadFromLocalStorage<string | null>(ACTIVE_CONVERSATION_KEY, null)
+    const fetchConversations = async () => {
+      setIsLoading(true)
+      const { data, error } = await supabase
+        .from('conversations')
+        .select('*, messages(*)')
+        .is('owner_id', null)
+        .order('updated_at', { ascending: false })
+        .order('created_at', { foreignTable: 'messages', ascending: true });
 
-    setConversations(savedConversations)
-    setActiveConversationId(savedActiveId)
-    setIsInitialized(true)
-  }, [])
-
-  useEffect(() => {
-    if (isInitialized) {
-      saveToLocalStorage(STORAGE_KEY, conversations)
+      if (error) {
+        console.error("Error fetching conversations:", error)
+        setConversations([])
+      } else if (data) {
+        const uiConversations = data.map(c => mapDbConversationToUi(c));
+        setConversations(uiConversations)
+        if (uiConversations.length > 0) {
+            setActiveConversationId(uiConversations[0].id)
+        }
+      }
+      setIsLoading(false)
     }
-  }, [conversations, isInitialized])
-
-  useEffect(() => {
-    if (isInitialized) {
-      saveToLocalStorage(ACTIVE_CONVERSATION_KEY, activeConversationId)
-    }
-  }, [activeConversationId, isInitialized])
+    fetchConversations()
+  }, [supabase])
 
   const activeConversation = conversations.find((c) => c.id === activeConversationId) || null
 
-  const createConversation = useCallback(() => {
-    const newConversation: Conversation = {
-      id: crypto.randomUUID(),
-      title: `Nueva conversación ${conversations.length + 1}`,
-      messages: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
+  const createConversation = useCallback(async (): Promise<string | undefined> => {
+    const newConversationData: NewConversation = { 
+      name: 'Nueva Conversación'
+    };
+    
+    const { data, error } = await supabase
+      .from('conversations')
+      .insert(newConversationData)
+      .select()
+      .single()
+
+    if (error) {
+      console.error("Error creating conversation:", error)
+      return
     }
-    setConversations((prev) => [newConversation, ...prev])
-    setActiveConversationId(newConversation.id)
-  }, [conversations.length])
+
+    if (data) {
+        const newConversation: Conversation = { ...mapDbConversationToUi(data), messages: [] }
+        setConversations((prev) => [newConversation, ...prev])
+        setActiveConversationId(newConversation.id)
+        return newConversation.id
+    }
+  }, [supabase])
 
   const selectConversation = useCallback((id: string) => {
     setActiveConversationId(id)
   }, [])
 
-  const deleteConversation = useCallback(
-    (id: string) => {
-      setConversations((prev) => prev.filter((c) => c.id !== id))
-      if (activeConversationId === id) {
-        setActiveConversationId(null)
-      }
-    },
-    [activeConversationId],
-  )
+  const deleteConversation = useCallback(async (id: string) => {
+    const oldConversations = conversations
+    setConversations((prev) => prev.filter((c) => c.id !== id))
+    if (activeConversationId === id) {
+      const remainingConversations = conversations.filter(c => c.id !== id);
+      setActiveConversationId(remainingConversations.length > 0 ? remainingConversations[0].id : null)
+    }
 
-  const addMessage = useCallback((conversationId: string, message: Message) => {
+    const { error } = await supabase.from('conversations').delete().match({ id })
+
+    if (error) {
+      console.error("Error deleting conversation:", error)
+      setConversations(oldConversations)
+    }
+  }, [activeConversationId, conversations, supabase])
+
+  const addMessage = useCallback(async (conversationId: string, message: Message) => {
     setConversations((prev) =>
       prev.map((c) => {
-        if (c.id !== conversationId) return c
-
-        const existingMessageIndex = c.messages.findIndex((m) => m.id === message.id)
-
-        if (existingMessageIndex !== -1) {
-          // Actualizar mensaje existente
-          const updatedMessages = [...c.messages]
-          updatedMessages[existingMessageIndex] = message
-          return {
-            ...c,
-            messages: updatedMessages,
-            updatedAt: new Date(),
-          }
-        } else {
-          // Agregar nuevo mensaje
-          return {
-            ...c,
-            messages: [...c.messages, message],
-            updatedAt: new Date(),
-          }
+        if (c.id !== conversationId) return c;
+        const messageExists = c.messages.some(m => m.id === message.id);
+        if (messageExists) {
+            return { ...c, messages: c.messages.map(m => m.id === message.id ? message : m), updatedAt: new Date() };
         }
-      }),
-    )
-  }, [])
+        return { ...c, messages: [...c.messages, message], updatedAt: new Date() };
+      })
+    );
 
-  const updateConversationTitle = useCallback((id: string, title: string) => {
-    setConversations((prev) =>
-      prev.map((c) =>
-        c.id === id
-          ? {
-              ...c,
-              title,
-              updatedAt: new Date(),
+    const newMessage: NewMessage = {
+        id: message.id,
+        conversation_id: conversationId,
+        role: message.role,
+        content: message.content,
+    }
+
+    const { error } = await supabase
+      .from('messages')
+      .upsert(newMessage);
+
+    if (error) {
+        console.error("Error saving message:", error);
+        setConversations(prev => prev.map(c => {
+            if (c.id === conversationId) {
+                return { ...c, messages: c.messages.filter(m => m.id !== message.id) }
             }
-          : c,
-      ),
-    )
-  }, [])
+            return c;
+        }))
+    }
+  }, [supabase]);
 
-  const clearAllConversations = useCallback(() => {
+  const updateConversationTitle = useCallback(async (id: string, title: string) => {
+    const oldConversations = conversations;
+    setConversations((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, title, updatedAt: new Date() } : c))
+    )
+
+    const { error } = await supabase
+      .from('conversations')
+      .update({ name: title })
+      .eq('id', id)
+
+    if (error) {
+      console.error("Error updating title:", error)
+      setConversations(oldConversations)
+    }
+  }, [conversations, supabase])
+
+  const clearAllConversations = useCallback(async () => {
+    const oldConversations = conversations;
+    const ids_to_delete = oldConversations.map(c => c.id)
     setConversations([])
     setActiveConversationId(null)
-    localStorage.removeItem(STORAGE_KEY)
-    localStorage.removeItem(ACTIVE_CONVERSATION_KEY)
-  }, [])
+
+    const { error } = await supabase.from('conversations').delete().in('id', ids_to_delete)
+
+    if (error) {
+      console.error("Error clearing conversations:", error)
+      setConversations(oldConversations)
+    }
+  }, [conversations, supabase])
 
   return (
     <ConversationsContext.Provider
@@ -170,6 +193,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
         addMessage,
         updateConversationTitle,
         clearAllConversations,
+        isLoading,
       }}
     >
       {children}
