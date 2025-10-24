@@ -1,11 +1,9 @@
 # AGENT.md
 
 ## 🧩 Setup Commands
-- Install dependencies: `npm install`
-- Run development server: `npm run dev`
-- Build for production: `npm run build`
-- Lint and fix code: `npm run lint --fix`
-- Format codebase: `npm run format`
+- Install dependencies: `pnpm install`
+- Run development server: `pnpm dev`
+- Build for production: `pnpm build`
 
 ---
 

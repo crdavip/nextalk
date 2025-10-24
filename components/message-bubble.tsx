@@ -29,7 +29,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           )}
         >
           <div className="text-sm leading-relaxed prose prose-sm max-w-none">
-            {message.content.split("\n").map((line, i) => (
+            {message.content.split(/\\n|\n/).map((line, i) => (
               <span key={i}>
                 {line.split(/(\*\*.*?\*\*)/).map((part, j) =>
                   part.startsWith("**") && part.endsWith("**") ? (
