@@ -39,16 +39,16 @@ export function WelcomeScreen({ onMenuClick }: WelcomeScreenProps) {
 
       <div className="flex-1 flex items-center justify-center px-4 md:px-8 py-8">
         <div className="max-w-2xl w-full text-center">
-          <div className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-6 md:mb-8 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
-            <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 flex items-center justify-center">
-              <div className="w-9 h-9 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-blue-500/40 to-purple-500/40" />
+          <div className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-6 md:mb-8 rounded-full bg-linear-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
+            <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-linear-to-br from-blue-500/30 to-purple-500/30 flex items-center justify-center">
+              <div className="w-9 h-9 md:w-12 md:h-12 rounded-full bg-linear-to-br from-blue-500/40 to-purple-500/40" />
             </div>
           </div>
 
           <h1 className="text-2xl md:text-4xl font-bold mb-2 text-balance">{greeting}, Usuario</h1>
           <p className="text-2xl md:text-4xl font-bold text-balance">
             ¿Cómo Puedo{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Asistirte Hoy?
             </span>
           </p>

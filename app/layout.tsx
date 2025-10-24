@@ -2,13 +2,13 @@ import type React from "react"
 import type { Metadata } from "next"
 
 import { Analytics } from "@vercel/analytics/next"
-import "./globals.css"
-
 import { ThemeProvider } from "@/lib/theme-provider"
 import { openSans } from "@/config/font-config"
+import "./globals.css"
+
 
 export const metadata: Metadata = {
-  title: "NexTalk - Chat con IA",
+  title: "NexTalk - by crdavip",
   description: "Aplicación de mensajería con inteligencia artificial",
 }
 

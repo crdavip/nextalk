@@ -1,0 +1,62 @@
+{
+  "id": "supabase-mcp",
+  "friendlyName": "Supabase MCP Server",
+  "capabilities": {
+    "workspace": true,
+    "fileSystem": true,
+    "runCommands": true,
+    "authentication": true,
+    "database": true
+  },
+  "settings": {
+    "supabase": {
+      "url": "${env:NEXT_PUBLIC_SUPABASE_URL}",
+      "anonKey": "${env:NEXT_PUBLIC_SUPABASE_ANON_KEY}",
+      "serviceKey": "${env:SUPABASE_SERVICE_ROLE_KEY}"
+    }
+  },
+  "commands": {
+    "database": {
+      "title": "Database Operations",
+      "commands": [
+        {
+          "command": "createTable",
+          "title": "Create Table"
+        },
+        {
+          "command": "query",
+          "title": "Execute Query"
+        },
+        {
+          "command": "insert",
+          "title": "Insert Data"
+        },
+        {
+          "command": "update",
+          "title": "Update Data"
+        },
+        {
+          "command": "delete",
+          "title": "Delete Data"
+        }
+      ]
+    },
+    "auth": {
+      "title": "Authentication",
+      "commands": [
+        {
+          "command": "signIn",
+          "title": "Sign In"
+        },
+        {
+          "command": "signOut",
+          "title": "Sign Out"
+        },
+        {
+          "command": "getCurrentUser",
+          "title": "Get Current User"
+        }
+      ]
+    }
+  }
+}
