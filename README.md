@@ -199,6 +199,6 @@ vercel --prod
 
 MIT
 
-## 👤 Autor
-
-Tu Nombre - [GitHub](https://github.com/tu-usuario)
+## 👨‍💻 Autor
+Desarrollado con ❤️ por **Cristian David**
+🔗 [GitHub](https://github.com/crdavip) · [LinkedIn](https://www.linkedin.com/in/crdavip/)
